@@ -6,5 +6,9 @@ public class ArrayDequeTest {
             else d.addLast(i);
         }
         d.printDeque();
+        for (int i = 0; i < 10 ; i++) {
+            System.out.println(d.removeFirst());
+            System.out.println(d.removeLast());
+        }
     }
 }

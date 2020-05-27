@@ -1,14 +1,25 @@
 public class ArrayDeque<T> {
     private int size, head, tail;
     private T[] items;
+
     public ArrayDeque() {
         size = 0;
         items = (T[]) new Object[10];
         head = 0;
         tail = 0;
     }
-    public ArrayDeque(ArrayDeque<T> other) {
 
+    public ArrayDeque(ArrayDeque other) {
+        items = (T[]) new Object[other.size * 2];
+        size = other.size;
+        int i = (other.head + 1) % other.items.length;
+        int j = 0;
+        for (; i != other.tail; j++) {
+            items[j] = (T) other.items[i];
+            i = (i + 1) % other.items.length;
+        }
+        head = items.length - 1;
+        tail = j;
     }
 
     private void resize(int len) {
@@ -20,16 +31,17 @@ public class ArrayDeque<T> {
             i = (i + 1) % items.length;
         }
         items = newItems;
-        head = items.length-1;
+        head = items.length - 1;
         tail = j;
     }
-    public void addFirst(T item){
+
+    public void addFirst(T item) {
         items[head] = item;
         head = (head - 1 + items.length) % items.length;
         if (size == 0)
             tail = (tail + 1) % items.length;
         size++;
-        if(head == tail)
+        if (head == tail)
             resize(items.length * 2);
     }
 
@@ -44,7 +56,7 @@ public class ArrayDeque<T> {
     }
 
     public boolean isEmpty() {
-        return size==0;
+        return size == 0;
     }
 
     public int size() {
@@ -52,7 +64,7 @@ public class ArrayDeque<T> {
     }
 
     public void printDeque() {
-        for(int i = (head + 1) % items.length;i != tail;i = (i + 1) % items.length)
+        for (int i = (head + 1) % items.length; i != tail; i = (i + 1) % items.length)
             System.out.print(items[i] + " ");
         System.out.println();
     }
@@ -60,9 +72,9 @@ public class ArrayDeque<T> {
     public T removeFirst() {
         if (isEmpty())
             return null;
+        head = (head + 1) % items.length;
         T ret = items[head];
         items[head] = null;
-        head = (head + 1) % items.length;
         size--;
         if (size == 0)
             tail = (tail - 1 + items.length) % items.length;
@@ -74,9 +86,9 @@ public class ArrayDeque<T> {
     public T removeLast() {
         if (isEmpty())
             return null;
+        tail = (tail - 1 + items.length) % items.length;
         T ret = items[tail];
         items[tail] = null;
-        tail = (tail - 1 + items.length) % items.length;
         size--;
         if (size == 0)
             head = (head + 1) % items.length;
