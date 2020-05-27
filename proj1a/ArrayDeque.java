@@ -24,6 +24,12 @@ public class ArrayDeque<T> {
 
     private void resize(int len) {
         T[] newItems = (T[]) new Object[len];
+        if (size == 0) {
+            head = 0;
+            tail = 0;
+            items = newItems;
+            return;
+        }
         int i = (head + 1) % items.length;
         int j = 0;
         for (; i != tail; j++) {
@@ -38,21 +44,25 @@ public class ArrayDeque<T> {
     public void addFirst(T item) {
         items[head] = item;
         head = (head - 1 + items.length) % items.length;
-        if (size == 0)
+        if (size == 0) {
             tail = (tail + 1) % items.length;
+        }
         size++;
-        if (head == tail)
+        if (head == tail) {
             resize(items.length * 2);
+        }
     }
 
     public void addLast(T item) {
         items[tail] = item;
         tail = (tail + 1) % items.length;
-        if (size == 0)
+        if (size == 0) {
             head = (head - 1 + items.length) % items.length;
+        }
         size++;
-        if (head == tail)
+        if (head == tail) {
             resize(items.length * 2);
+        }
     }
 
     public boolean isEmpty() {
@@ -64,42 +74,50 @@ public class ArrayDeque<T> {
     }
 
     public void printDeque() {
-        for (int i = (head + 1) % items.length; i != tail; i = (i + 1) % items.length)
+        for (int i = (head + 1) % items.length; i != tail; i = (i + 1) % items.length) {
             System.out.print(items[i] + " ");
+        }
         System.out.println();
     }
 
     public T removeFirst() {
-        if (isEmpty())
+        if (isEmpty()) {
             return null;
+        }
         head = (head + 1) % items.length;
         T ret = items[head];
         items[head] = null;
         size--;
-        if (size == 0)
+        if (size == 0) {
             tail = (tail - 1 + items.length) % items.length;
-        if (size < items.length / 4)
+        }
+        if (size < items.length / 4) {
             resize(items.length / 2);
+        }
         return ret;
     }
 
     public T removeLast() {
-        if (isEmpty())
+        if (isEmpty()) {
             return null;
+        }
         tail = (tail - 1 + items.length) % items.length;
         T ret = items[tail];
         items[tail] = null;
         size--;
-        if (size == 0)
+        if (size == 0) {
             head = (head + 1) % items.length;
-        if (size < items.length / 4)
+        }
+        if (size < items.length / 4) {
             resize(items.length / 2);
+        }
         return ret;
     }
 
     public T get(int index) {
-        if (index >= size)
+        if (index >= size) {
             return null;
+        }
         return items[(head + index + 1) % items.length];
     }
 
