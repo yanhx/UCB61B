@@ -174,7 +174,8 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
         T ret = peek();
         swap(1, size);
         contents[size--] = null;
-        sink(1);
+        if (size != 0)
+            sink(1);
         return ret;
     }
 
@@ -203,9 +204,7 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
                 index = i;
             }
         }
-        if (index == 0) {
-            return;
-        }
+        if (index == 0) return;
         contents[index] = new Node(item, priority);
         swim(index);
         sink(index);
