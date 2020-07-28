@@ -2,6 +2,13 @@ package hw4.puzzle;
 
 public class Board {
 
+    public Board(int[][] x) {
+    }
+
+    public int tileAt(int i, int i1) {
+        return 0;
+    }
+
     /** Returns the string representation of the board. 
       * Uncomment this method. */
     /*public String toString() {
