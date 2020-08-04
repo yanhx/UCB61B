@@ -54,6 +54,8 @@ public class AstarSP {
 
     public List<Long> pathTo(long v) {
         LinkedList<Long> path = new LinkedList<Long>();
+        if (edgeTo.get(v) == null)
+            return path;
         while (v != s) {
             path.addFirst(v);
             v = edgeTo.get(v);
