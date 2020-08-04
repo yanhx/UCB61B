@@ -37,6 +37,7 @@ public class GraphBuildingHandler extends DefaultHandler {
                     "residential", "living_street", "motorway_link", "trunk_link", "primary_link",
                     "secondary_link", "tertiary_link"));
     private String activeState = "";
+    private long lastRef = 0, currentWayId = 0, currentNodeId = 0;
     private final GraphDB g;
 
     /**
@@ -68,17 +69,18 @@ public class GraphBuildingHandler extends DefaultHandler {
         if (qName.equals("node")) {
             /* We encountered a new <node...> tag. */
             activeState = "node";
-//            System.out.println("Node id: " + attributes.getValue("id"));
-//            System.out.println("Node lon: " + attributes.getValue("lon"));
-//            System.out.println("Node lat: " + attributes.getValue("lat"));
+            currentNodeId = Long.parseLong(attributes.getValue("id"));
+            g.addNode(Long.parseLong(attributes.getValue("id")),
+                    Double.parseDouble(attributes.getValue("lat")),
+                    Double.parseDouble(attributes.getValue("lon")));
 
-            /* TODO Use the above information to save a "node" to somewhere. */
-            /* Hint: A graph-like structure would be nice. */
 
         } else if (qName.equals("way")) {
             /* We encountered a new <way...> tag. */
             activeState = "way";
-//            System.out.println("Beginning a way...");
+            currentWayId = Long.parseLong(attributes.getValue("id"));
+            g.addWay(currentWayId);
+
         } else if (activeState.equals("way") && qName.equals("nd")) {
             /* While looking at a way, we found a <nd...> tag. */
             //System.out.println("Id of a node in this way: " + attributes.getValue("ref"));
@@ -89,6 +91,10 @@ public class GraphBuildingHandler extends DefaultHandler {
             cumbersome since you might have to remove the connections if you later see a tag that
             makes this way invalid. Instead, think of keeping a list of possible connections and
             remember whether this way is valid or not. */
+            if (lastRef != 0) {
+                g.cacheEdge(currentWayId, lastRef, Long.parseLong(attributes.getValue("ref")));
+            }
+            lastRef = Long.parseLong(attributes.getValue("ref"));
 
         } else if (activeState.equals("way") && qName.equals("tag")) {
             /* While looking at a way, we found a <tag...> tag. */
@@ -101,8 +107,15 @@ public class GraphBuildingHandler extends DefaultHandler {
                 //System.out.println("Highway type: " + v);
                 /* TODO Figure out whether this way and its connections are valid. */
                 /* Hint: Setting a "flag" is good enough! */
+                if (ALLOWED_HIGHWAY_TYPES.contains(v)) {
+                    g.validateWay(currentWayId, true);
+                }
+                else {
+                    g.validateWay(currentWayId, false);
+                }
             } else if (k.equals("name")) {
                 //System.out.println("Way Name: " + v);
+                g.setWayName(currentWayId, v);
             }
 //            System.out.println("Tag with k=" + k + ", v=" + v + ".");
         } else if (activeState.equals("node") && qName.equals("tag") && attributes.getValue("k")
@@ -113,6 +126,7 @@ public class GraphBuildingHandler extends DefaultHandler {
             node this tag belongs to. Remember XML is parsed top-to-bottom, so probably it's the
             last node that you looked at (check the first if-case). */
 //            System.out.println("Node's name: " + attributes.getValue("v"));
+            g.setLocationName(currentNodeId, attributes.getValue("v"));
         }
     }
 
@@ -134,6 +148,14 @@ public class GraphBuildingHandler extends DefaultHandler {
             /* Hint1: If you have stored the possible connections for this way, here's your
             chance to actually connect the nodes together if the way is valid. */
 //            System.out.println("Finishing a way...");
+            g.addCachedEdges();
+            currentWayId = 0;
+            lastRef = 0;
+            activeState = "";
+        }
+        if (qName.equals("node")) {
+            currentNodeId = 0;
+            activeState = "";
         }
     }
 

@@ -1,3 +1,4 @@
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -25,8 +26,13 @@ public class Router {
      */
     public static List<Long> shortestPath(GraphDB g, double stlon, double stlat,
                                           double destlon, double destlat) {
-        return null; // FIXME
+        long s = g.closest(stlon, stlat);
+        long t = g.closest(destlon, destlat);
+        AstarSP sp  = new AstarSP(g, s, t);
+        return sp.pathTo(t);
     }
+
+
 
     /**
      * Create the list of directions corresponding to a route on the graph.
@@ -37,7 +43,59 @@ public class Router {
      * route.
      */
     public static List<NavigationDirection> routeDirections(GraphDB g, List<Long> route) {
-        return null; // FIXME
+        LinkedList<NavigationDirection> ret = new LinkedList<NavigationDirection>();
+        long currentWayId = 0, w = 0;
+        String currentWayName = "";
+        double dist = 0.0, currentDir = 0;
+        NavigationDirection current = new NavigationDirection();
+        for (long v : route) {
+            if (w == 0) {
+                w = v;
+                current.direction = NavigationDirection.START;
+                continue;
+            }
+            long wayId = g.getWayId(v, w);
+            if (currentWayId == 0) {
+                currentWayId = wayId;
+                currentWayName = g.getWayName(currentWayId);
+            }
+            double newDir = g.bearing(w, v);
+            String newWayName = g.getWayName(wayId);
+            if(wayId != currentWayId && !newWayName.equals(currentWayName)) {
+                current.way = g.getWayName(currentWayId);
+                current.distance = dist;
+                ret.add(current);
+                current = new NavigationDirection();
+                dist = 0;
+                current.direction = calculateDir((newDir - currentDir) % 180);
+            }
+            dist += g.distance(v, w);
+            currentDir = newDir;
+            w = v;
+            currentWayId = wayId;
+            currentWayName = newWayName;
+        }
+        current.way = g.getWayName(currentWayId);
+        current.distance = dist;
+        ret.add(current);
+        return ret;
+    }
+
+    private static int calculateDir(double changeDir) {
+        if (changeDir >= 100)
+            return NavigationDirection.SHARP_LEFT;
+        else if (changeDir >= 30)
+            return NavigationDirection.LEFT;
+        else if (changeDir >= 15)
+            return NavigationDirection.SLIGHT_LEFT;
+        else if (changeDir >= -15)
+            return NavigationDirection.STRAIGHT;
+        else if (changeDir >= -30)
+            return NavigationDirection.SLIGHT_RIGHT;
+        else if (changeDir >= -100)
+            return NavigationDirection.RIGHT;
+        else
+            return NavigationDirection.SHARP_RIGHT;
     }
 
 
