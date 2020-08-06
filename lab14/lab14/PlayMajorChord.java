@@ -18,6 +18,6 @@ public class PlayMajorChord {
         MultiGenerator mg = new MultiGenerator(generators);
 
         GeneratorAudioVisualizer gav = new GeneratorAudioVisualizer(mg);
-        gav.drawAndPlay(1200, 100000);
+        gav.drawAndPlay(1200, 200000);
     }
 }
