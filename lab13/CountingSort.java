@@ -2,7 +2,6 @@
  * Class with 2 ways of doing Counting sort, one naive way and one "better" way
  *
  * @author Akhil Batra, Alexander Hwang
- *
  **/
 public class CountingSort {
     /**
@@ -66,7 +65,24 @@ public class CountingSort {
      * @param arr int array that will be sorted
      */
     public static int[] betterCountingSort(int[] arr) {
-        // TODO make counting sort work with arrays containing negative numbers.
-        return null;
+        int n = arr.length;
+        int max = Integer.MIN_VALUE, min = Integer.MAX_VALUE;
+        for (int i : arr) {
+            max = Math.max(max, i);
+            min = Math.min(min, i);
+        }
+        int R = max - min + 1;
+        int[] aux = new int[n];
+        int[] count = new int[R + 1];
+        for (int value : arr) {
+            count[value - min + 1]++;
+        }
+        for (int r = 0; r < R; r++) {
+            count[r + 1] += count[r];
+        }
+        for (int value : arr) {
+            aux[count[value - min]++] = value;
+        }
+        return aux;
     }
 }
